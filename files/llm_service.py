@@ -27,7 +27,7 @@ class LLMService:
             api_key: API key (uses GOOGLE_API_KEY env var if not provided)
             model: Model to use (gemini-1.5-flash is free and fast)
         """
-        self.api_key = api_key or os.getenv("GOOGLE_API_KEY")
+        self.api_key = api_key or os.getenv("AIzaSyDg6LU7WCLXcZYt725UcMmi0SgfblD5W5A")
         self.model = model
         
         if not self.api_key:
