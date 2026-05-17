@@ -1,0 +1,45 @@
+# Render.com deployment configuration
+# Deploy with: render deploy
+
+# Use this file for Render.com native Python deployment
+# Alternative: Use Docker deployment with the provided Dockerfile
+
+services:
+  - type: web
+    name: shl-recommender
+    runtime: python
+    pythonVersion: "3.11"
+    
+    # Build configuration
+    buildCommand: |
+      pip install -r requirements.txt && \
+      python build_catalog.py && \
+      python build_embeddings.py
+    
+    # Start command
+    startCommand: python -m uvicorn main:app --host 0.0.0.0 --port $PORT
+    
+    # Environment variables
+    envVars:
+      - key: ANTHROPIC_API_KEY
+        scope: run
+        value: ${ANTHROPIC_API_KEY}
+      - key: LOG_LEVEL
+        scope: run
+        value: info
+    
+    # Health check
+    healthCheckPath: /health
+    
+    # Resources
+    plan: standard
+    numInstances: 1
+    
+    # Disk
+    disk:
+      name: data
+      mountPath: /app/data
+      sizeGB: 5
+    
+    # Auto-deploy on push
+    autoDeploy: true
