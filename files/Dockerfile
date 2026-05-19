@@ -25,9 +25,12 @@ COPY . .
 # Create data directory
 RUN mkdir -p /app/data
 
-# Build catalog and embeddings at image build time
-RUN python build_catalog.py && \
-    python build_embeddings.py
+# Build catalog at image build time
+RUN python build_catalog.py
+
+# NOTE: Embeddings should be pre-built locally and committed to git
+# Build them locally: python build_embeddings.py
+# Then: git add data/ && git commit && git push
 
 # Expose port
 EXPOSE 8000

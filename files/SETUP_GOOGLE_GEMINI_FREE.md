@@ -1,27 +1,50 @@
+# 🆓 FREE SETUP - Google Gemini API (5 minutes)
+
+## The Easiest Free Option
+
+Google's Gemini API is **completely free** with no credit card needed.
+
+---
+
+## Step 1: Get Free API Key (2 minutes)
+
+1. Go to: **https://ai.google.dev/**
+2. Click **"Get API Key"** (top right)
+3. Click **"Create API Key in new Google Cloud project"**
+4. **Copy the key** (looks like: `AIzaSy...`)
+5. **Save it somewhere safe**
+
+✅ **That's it! No credit card needed!**
+
+---
+
+## Step 2: Update Your Code (3 minutes)
+
+### File 1: Replace `llm_service.py`
+
+Delete the old file and create new one with this code:
+
+```python
 """
-LLM service for interacting with Google Gemini API (FREE).
-Uses Google's Gemini 1.5 Flash model - completely free tier.
-60 requests per minute - more than sufficient for production.
+LLM service using Google Gemini API (FREE)
 """
 
 import os
 import json
 import logging
-from typing import Optional, Tuple, List, Dict, Any
+from typing import Optional, Dict, Any
+
 import google.generativeai as genai
 
 logger = logging.getLogger(__name__)
 
 
 class LLMService:
-    """
-    Service for LLM interactions using Google Gemini API.
-    FREE tier: 60 requests per minute, unlimited month.
-    """
+    """Service for Google Gemini API."""
 
     def __init__(self, api_key: Optional[str] = None, model: str = "gemini-1.5-flash"):
         """
-        Initialize LLM service with Google Gemini.
+        Initialize LLM service.
         
         Args:
             api_key: API key (uses GOOGLE_API_KEY env var if not provided)
@@ -42,18 +65,7 @@ class LLMService:
         max_tokens: int = 1000,
         temperature: float = 0.7
     ) -> str:
-        """
-        Generate text using Google Gemini.
-        
-        Args:
-            prompt: User message/prompt
-            system_prompt: System prompt for context
-            max_tokens: Maximum tokens to generate
-            temperature: Sampling temperature (0.0-1.0)
-        
-        Returns:
-            Generated text
-        """
+        """Generate text using Google Gemini."""
         try:
             full_prompt = f"{system_prompt}\n\n{prompt}" if system_prompt else prompt
             
@@ -84,28 +96,17 @@ class LLMService:
         system_prompt: Optional[str] = None,
         max_tokens: int = 2000
     ) -> Dict[str, Any]:
-        """
-        Generate and parse JSON output from Google Gemini.
-        
-        Args:
-            prompt: Prompt requesting JSON
-            system_prompt: System context
-            max_tokens: Maximum tokens
-        
-        Returns:
-            Parsed JSON dictionary
-        """
+        """Generate and parse JSON output."""
         system = system_prompt or "You must respond with ONLY valid JSON, no other text."
         
         response_text = self.generate_text(
             prompt=prompt,
             system_prompt=system,
             max_tokens=max_tokens,
-            temperature=0.3  # Lower temp for structured output
+            temperature=0.3
         )
         
         try:
-            # Clean up response (remove markdown code blocks if present)
             cleaned = response_text.strip()
             if cleaned.startswith("```json"):
                 cleaned = cleaned[7:]
@@ -121,13 +122,8 @@ class LLMService:
             logger.error(f"JSON parsing error: {e}\nResponse: {response_text}")
             raise ValueError(f"Failed to parse JSON response: {e}")
 
-    def detect_intent(self, conversation: str) -> Tuple[str, float, Dict]:
-        """
-        Detect user intent from conversation.
-        
-        Returns:
-            Tuple of (intent, confidence, context_dict)
-        """
+    def detect_intent(self, conversation: str) -> tuple:
+        """Detect user intent from conversation."""
         from prompt_templates import INTENT_DETECTION_PROMPT
         
         prompt = INTENT_DETECTION_PROMPT.format(conversation=conversation)
@@ -139,13 +135,8 @@ class LLMService:
             result.get("context", {})
         )
 
-    def generate_clarification_question(
-        self,
-        role: Optional[str] = None,
-        skills: Optional[List[str]] = None,
-        goals: Optional[List[str]] = None
-    ) -> str:
-        """Generate clarifying question based on context."""
+    def generate_clarification_question(self, role=None, skills=None, goals=None) -> str:
+        """Generate clarifying question."""
         from prompt_templates import CLARIFICATION_PROMPT
         
         prompt = CLARIFICATION_PROMPT.format(
@@ -156,13 +147,7 @@ class LLMService:
         
         return self.generate_text(prompt, temperature=0.8)
 
-    def generate_recommendation_response(
-        self,
-        role: str,
-        skills: Optional[List[str]] = None,
-        goals: Optional[List[str]] = None,
-        assessments: Optional[List[str]] = None
-    ) -> str:
+    def generate_recommendation_response(self, role, skills=None, goals=None, assessments=None) -> str:
         """Generate response with recommendations."""
         from prompt_templates import RECOMMENDATION_RESPONSE_PROMPT
         
@@ -177,11 +162,7 @@ class LLMService:
         
         return self.generate_text(prompt, temperature=0.7)
 
-    def generate_comparison(
-        self,
-        assessment1: str,
-        assessment2: str
-    ) -> str:
+    def generate_comparison(self, assessment1: str, assessment2: str) -> str:
         """Generate comparison of two assessments."""
         from prompt_templates import COMPARISON_PROMPT
         
@@ -192,13 +173,8 @@ class LLMService:
         
         return self.generate_text(prompt, temperature=0.5)
 
-    def should_refuse(self, request: str) -> Tuple[bool, str]:
-        """
-        Determine if request should be refused.
-        
-        Returns:
-            Tuple of (should_refuse: bool, reason: str)
-        """
+    def should_refuse(self, request: str) -> tuple:
+        """Determine if request should be refused."""
         from prompt_templates import REFUSAL_PROMPT
         
         prompt = REFUSAL_PROMPT.format(request=request)
@@ -215,3 +191,173 @@ class LLMService:
         
         prompt = CONTEXT_EXTRACTION_PROMPT.format(conversation=conversation)
         return self.extract_json(prompt)
+```
+
+### File 2: Update `requirements.txt`
+
+Replace the old one with:
+
+```
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+pydantic==2.5.0
+sentence-transformers==2.2.2
+faiss-cpu==1.7.4
+numpy==1.24.3
+google-generativeai==0.3.0
+python-dotenv==1.0.0
+pytest==7.4.3
+beautifulsoup4==4.12.2
+requests==2.31.0
+```
+
+---
+
+## Step 3: Set Environment Variable
+
+Create `.env` file in your project:
+
+```bash
+cat > .env << 'EOF'
+GOOGLE_API_KEY=AIzaSy_YOUR_API_KEY_HERE
+PORT=8000
+LOG_LEVEL=info
+EOF
+```
+
+Or set as environment variable:
+
+```bash
+export GOOGLE_API_KEY=AIzaSy_YOUR_API_KEY_HERE
+```
+
+---
+
+## Step 4: Test Locally
+
+```bash
+# Install dependencies
+pip install -r requirements.txt
+
+# Build data
+python build_catalog.py
+python build_embeddings.py
+
+# Start server
+python -m uvicorn main:app --reload
+
+# Test in another terminal
+curl -X POST http://localhost:8000/chat \
+  -H "Content-Type: application/json" \
+  -d '{
+    "messages": [
+      {"role": "user", "content": "I need to hire a Java developer"}
+    ]
+  }'
+```
+
+✅ Should return recommendations!
+
+---
+
+## Step 5: Deploy to Render
+
+### 5.1 Push to GitHub
+
+```bash
+git add .
+git commit -m "Switch to Google Gemini API (free)"
+git push origin main
+```
+
+### 5.2 Deploy on Render
+
+1. Go to **https://render.com**
+2. Sign up with GitHub
+3. Click **"New Web Service"**
+4. Select your `shl-recommender` repo
+5. Set environment variables:
+   - `GOOGLE_API_KEY` = Your API key
+   - `PORT` = 8000
+6. Create disk:
+   - Name: `data`
+   - Mount: `/app/data`
+   - Size: `5 GB`
+7. Click **"Create Web Service"**
+8. Wait 5-10 minutes
+9. **Copy your live URL!** 🎉
+
+---
+
+## 🎉 You're Done!
+
+Your API is now live and **completely free**!
+
+```
+GET    https://shl-recommender-XXXXX.onrender.com/health
+POST   https://shl-recommender-XXXXX.onrender.com/chat
+```
+
+---
+
+## Free Tier Limits
+
+- ✅ **No credit card required**
+- ✅ **60 requests per minute** (plenty!)
+- ✅ **Powerful model** (Gemini 1.5 Flash)
+- ✅ **Unlimited for 12 months** (free tier)
+
+After 12 months, very affordable pricing.
+
+---
+
+## Cost Comparison
+
+| Service | Cost | Setup |
+|---------|------|-------|
+| **Google Gemini** | FREE (60 req/min) | 5 min |
+| **Ollama Local** | FREE | 10 min |
+| **Anthropic** | Paid | 5 min |
+
+---
+
+## If You Want Local (No Internet)
+
+Use **Ollama** instead:
+
+```bash
+# Install from: https://ollama.ai
+
+# Start Ollama
+ollama serve
+
+# In another terminal
+ollama pull mistral
+
+# Copy code from FREE_LLM_ALTERNATIVES.md (Option 2: Ollama)
+# Update llm_service.py to use Ollama
+# Run your app!
+```
+
+---
+
+## Troubleshooting
+
+| Problem | Solution |
+|---------|----------|
+| "GOOGLE_API_KEY not found" | Set in `.env` file or environment variable |
+| API limits exceeded | Free tier has 60 req/min limit, should be fine |
+| "Safety violation" | Model might refuse some prompts, add safety_settings |
+| Import error | Run `pip install google-generativeai` |
+
+---
+
+## Summary
+
+✅ **Free forever** - No credit card  
+✅ **60 requests/minute** - More than enough  
+✅ **Powerful model** - Gemini 1.5 Flash  
+✅ **5 minute setup** - Easy!  
+✅ **Deploy anywhere** - Works with Render  
+
+**You're ready to deploy!** 🚀
